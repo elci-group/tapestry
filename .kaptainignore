@@ -1,0 +1,4 @@
+target/
+tapestry-data/
+.swarm/
+*.swp
