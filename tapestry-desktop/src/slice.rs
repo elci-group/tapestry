@@ -21,6 +21,7 @@ use crate::cli::ExitCode;
 use crate::knowledge::{
     KnowledgeEdge, KnowledgeJournal, KnowledgeNode, NodeKind, Origin, Relationship,
 };
+use crate::lineage;
 use crate::mesut::{Lanes, TaskSpec};
 use crate::playbook::Drive;
 use crate::resources::{storage_report, CacheClass, CheckResult, PressureSignals};
@@ -77,6 +78,7 @@ fn stage_artifact(
     session_id: &SessionId,
     prompt: &str,
     variants: u8,
+    revision_base: u32,
 ) -> Result<Vec<Artifact>, String> {
     let mut artifacts = Vec::new();
     std::fs::create_dir_all(dirs.artefacts()).map_err(|e| e.to_string())?;
@@ -89,7 +91,7 @@ fn stage_artifact(
             .generated_by("tapestry-placeholder", None)
             .comparison_group(format!("tap-{session_id}"))
             .hint("dark")
-            .revision(variant as u32)
+            .revision(revision_base + u32::from(variant) - 1)
             .build();
         artifact.validate().map_err(|e| e.to_string())?;
         let path = dirs.artefacts().join(format!("{}.bin", artifact.digest));
@@ -125,6 +127,7 @@ fn record_knowledge(
     session: &Session,
     artifacts: &[Artifact],
     review_decision: Option<&tapestry_core::review::ReviewDecision>,
+    continuation: Option<&lineage::Continuation>,
 ) -> Result<(), String> {
     let map_err = |e: crate::knowledge::JournalError| e.to_string();
     let node = |id: String, kind: NodeKind| KnowledgeNode {
@@ -174,8 +177,54 @@ fn record_knowledge(
                 origin: Origin::ExplicitHumanJudgement,
             })
             .map_err(map_err)?;
-        // The decision text is the machine-readable name of the review choice.
         let _ = format!("{decision:?}");
+
+        // §26: an approval/select is explicit human judgement — record the
+        // SELECTED_OVER relations so continuations can resolve them (§36).
+        if matches!(
+            decision,
+            tapestry_core::review::ReviewDecision::Approve
+                | tapestry_core::review::ReviewDecision::Select
+        ) {
+            if let Some(winner) = artifacts.first() {
+                for loser in &artifacts[1..] {
+                    journal
+                        .append_edge(KnowledgeEdge {
+                            from: format!("artefact_{}", winner.id),
+                            rel: Relationship::SelectedOver,
+                            to: format!("artefact_{}", loser.id),
+                            confidence: 1.0,
+                            origin: Origin::ExplicitHumanJudgement,
+                        })
+                        .map_err(map_err)?;
+                }
+            }
+        }
+    }
+
+    // §36 lineage: a continuation session supersedes its parent, and its
+    // artefacts supersede the artefact they build upon.
+    if let Some(cont) = continuation {
+        journal
+            .append_edge(KnowledgeEdge {
+                from: format!("session_{}", session.id),
+                rel: Relationship::Supersedes,
+                to: cont.parent_session_raw.clone(),
+                confidence: 1.0,
+                origin: Origin::AgentJudgement,
+            })
+            .map_err(map_err)?;
+        for artifact in artifacts {
+            journal
+                .append_edge(KnowledgeEdge {
+                    from: format!("artefact_{}", artifact.id),
+                    rel: Relationship::Supersedes,
+                    to: cont.parent_artifact_raw.clone(),
+                    confidence: 0.9,
+                    origin: Origin::AgentJudgement,
+                })
+                .map_err(map_err)?;
+        }
     }
     Ok(())
 }
@@ -244,6 +293,19 @@ fn read_review_decision(
 pub fn run_prompt(text: &str, machine: bool) -> i32 {
     let started = std::time::Instant::now();
     let dirs = DataDirs::resolve();
+
+    // §36 continuation: does this prompt build on the last session?
+    let continuation = open_journal(&dirs)
+        .ok()
+        .and_then(|journal| lineage::resolve_continuation(&journal, text));
+    if let Some(c) = &continuation {
+        if !machine {
+            println!(
+                "continuing {} — building on {}",
+                c.parent_session_raw, c.parent_artifact_raw
+            );
+        }
+    }
 
     // Gate 2: credentials. Seed the POC vault and authorize the device.
     let device = loopback_device();
@@ -320,7 +382,8 @@ pub fn run_prompt(text: &str, machine: bool) -> i32 {
     // Artefact generation (deterministic placeholder).
     transition(&mut session, SessionState::Planning).ok();
     transition(&mut session, SessionState::Generating).ok();
-    let artifacts = match stage_artifact(&dirs, &session.id, text, 4) {
+    let revision_base = if continuation.is_some() { 2 } else { 1 };
+    let artifacts = match stage_artifact(&dirs, &session.id, text, 4, revision_base) {
         Ok(a) => a,
         Err(e) => {
             eprintln!("tapestry: artefact staging failed: {e}");
@@ -409,7 +472,15 @@ pub fn run_prompt(text: &str, machine: bool) -> i32 {
         }
     };
     let decision_kind = decision;
-    if record_knowledge(&mut journal, &session, &artifacts, Some(&decision_kind)).is_err() {
+    if record_knowledge(
+        &mut journal,
+        &session,
+        &artifacts,
+        Some(&decision_kind),
+        continuation.as_ref(),
+    )
+    .is_err()
+    {
         eprintln!("tapestry: knowledge append failed");
         return ExitCode::Usage.as_i32();
     }
@@ -459,7 +530,7 @@ pub fn send_file(file: &Path, machine: bool) -> i32 {
     }
     let dirs = DataDirs::resolve();
     let session = Session::new(format!("send {}", file.display()));
-    match stage_artifact(&dirs, &session.id, file.to_string_lossy().as_ref(), 1) {
+    match stage_artifact(&dirs, &session.id, file.to_string_lossy().as_ref(), 1, 1) {
         Ok(artifacts) if !artifacts.is_empty() => {
             if machine {
                 println!(

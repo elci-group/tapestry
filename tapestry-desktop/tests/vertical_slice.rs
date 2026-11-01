@@ -130,3 +130,60 @@ fn doctor_reports_healthy_after_run() {
     assert!(stdout.contains("knowledge"));
     assert!(stdout.contains("pressure"));
 }
+
+#[test]
+fn continuation_knows_the_selected_artefact() {
+    let bin = binary_path();
+    let data = tempfile::tempdir().unwrap();
+
+    // Session 1: generate, approve — a selection is recorded.
+    let mut child = Command::new(&bin)
+        .arg("Generate four visual concepts for the Tapestry home screen")
+        .env("TAPESTRY_DATA", data.path())
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(b"APPROVE\n")
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert_eq!(out.status.code(), Some(0), "first run failed");
+
+    // §36: the continuation must NOT require repeating the artefact id.
+    let mut child = Command::new(&bin)
+        .arg("Make the selected concept darker and reduce visual density")
+        .env("TAPESTRY_DATA", data.path())
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(b"APPROVE\n")
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert_eq!(out.status.code(), Some(0), "continuation failed");
+    assert!(
+        stdout.contains("continuing session_"),
+        "continuation banner missing: {stdout}"
+    );
+
+    // Journal carries lineage: session supersedes session, artefact
+    // supersedes artefact (SUPERSEDES edges).
+    let journal = std::fs::read_to_string(data.path().join("knowledge/tapestry.jsonl")).unwrap();
+    assert!(
+        journal.contains("SUPERSEDES"),
+        "no SUPERSEDES edge recorded"
+    );
+    // Two sessions exist after the continuation.
+    assert_eq!(journal.matches("\"kind\":\"session\"").count(), 2);
+}

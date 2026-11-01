@@ -8,11 +8,13 @@
 pub mod auth;
 pub mod cli;
 pub mod knowledge;
+pub mod lineage;
 pub mod mesut;
 pub mod playbook;
 pub mod resources;
 pub mod share;
 pub mod slice;
+pub mod tap_tcp;
 pub mod temppolicy;
 pub mod transport;
 
