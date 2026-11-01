@@ -1,0 +1,7 @@
+/target
+Cargo.lock
+.swarm/
+drive-journal.jsonl
+tapestry-data/
+.kaptaind/
+*.swp

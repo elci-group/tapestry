@@ -1,0 +1,28 @@
+[package]
+name = "tapestry-desktop"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Tapestry desktop coordinator and `tapestry` CLI (Gate 1-8 desktop plane)"
+license = "MIT"
+
+[[bin]]
+name = "tapestry"
+path = "src/main.rs"
+
+[dependencies]
+tapestry-core = { path = "../tapestry-core" }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+sha2 = "0.10"
+hex = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+strip = true

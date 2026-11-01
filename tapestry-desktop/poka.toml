@@ -1,0 +1,14 @@
+[project]
+name = "tapestry-desktop"
+
+[tools]
+claude = true
+codex = true
+
+lwoodz = true
+traci = true
+
+[rules]
+documentation = true
+security = true
+testing = true

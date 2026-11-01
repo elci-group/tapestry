@@ -1,0 +1,33 @@
+[[file]]
+path = "src/lib.rs"
+required = true
+forbid_regex = ["TOD[O]", "FIX[M]E", "unimplemented!"]
+
+[[file]]
+path = "README.md"
+required = true
+min_size_bytes = 800
+require_regex = ["tapestry-desktop", "Gates 1", "cargo test"]
+
+[[file]]
+path = "VERSION"
+required = true
+
+[[command]]
+name = "cargo test"
+cmd = ["cargo", "test"]
+expect_exit = 0
+timeout_secs = 300
+stdout_contains = ["test result: ok"]
+
+[[command]]
+name = "cargo clippy"
+cmd = ["cargo", "clippy", "--all-targets", "--", "-D", "warnings"]
+expect_exit = 0
+timeout_secs = 300
+
+[[command]]
+name = "cargo fmt"
+cmd = ["cargo", "fmt", "--check"]
+expect_exit = 0
+timeout_secs = 60
