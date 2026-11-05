@@ -1,0 +1,59 @@
+[[file]]
+path = "tapestry-webos/MVP_DIRECTIVE.md"
+required = true
+min_size_bytes = 5000
+require_regex = ["Gate W2", "Playbook usage policy", "Luna"]
+
+[[file]]
+path = "tapestry-webos/README.md"
+required = true
+min_size_bytes = 700
+require_regex = ["host-testable MVP adapter", "cargo test -p tapestry-webos"]
+
+[[file]]
+path = "tapestry-webos/src/lib.rs"
+required = true
+forbid_regex = ["TODO", "FIXME", "unimplemented!", "todo!"]
+
+[[file]]
+path = "tapestry-webos/src/device.rs"
+required = true
+forbid_regex = ["TODO", "FIXME", "unimplemented!", "todo!"]
+
+[[file]]
+path = "tapestry-webos/src/transport.rs"
+required = true
+forbid_regex = ["TODO", "FIXME", "unimplemented!", "todo!"]
+
+[[file]]
+path = "tapestry-webos/tests/device.rs"
+required = true
+
+[[file]]
+path = "tapestry-webos/tests/transport.rs"
+required = true
+
+[[command]]
+name = "WebOS package formatting"
+cmd = ["cargo", "fmt", "-p", "tapestry-webos", "--", "--check"]
+expect_exit = 0
+timeout_secs = 60
+
+[[command]]
+name = "WebOS package clippy"
+cmd = ["cargo", "clippy", "-p", "tapestry-webos", "--all-targets", "--offline", "--", "-D", "warnings"]
+expect_exit = 0
+timeout_secs = 180
+
+[[command]]
+name = "WebOS package check"
+cmd = ["cargo", "check", "-p", "tapestry-webos", "--offline"]
+expect_exit = 0
+timeout_secs = 180
+
+[[command]]
+name = "WebOS package tests"
+cmd = ["cargo", "test", "-p", "tapestry-webos", "--offline"]
+expect_exit = 0
+timeout_secs = 180
+stdout_contains = ["test result: ok"]

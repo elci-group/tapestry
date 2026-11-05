@@ -1,0 +1,11 @@
+[watch]
+cluster = "tapestry-webos"
+weights = { "gate-0": 100, "gate-1": 50 }
+
+[version]
+current = "0.1.0"
+next = "0.1.1"
+
+[hooks]
+pre_version = "cargo test --check"
+post_version = "git commit -m 'chore: bump version to {{version}}'"

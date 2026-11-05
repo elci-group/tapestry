@@ -22,9 +22,18 @@ patch = 0.1
 enabled = true
 branch = "main"
 
+[capabilities]
+network_push = true
+
 [ratelimit]
 min_commit_interval = 10
 
 [test]
 command = "cargo test"
 required = true
+
+[operation]
+mode = "actuate"
+
+[trust]
+execution = "trusted"

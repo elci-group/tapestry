@@ -1,0 +1,23 @@
+[project]
+name = "tapestry-webos"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace]
+members = ["tapestry-core", "tapestry-desktop", "tapestry-webos"]
+
+[package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+tapestry-core = { path = "../tapestry-core" }
+
+[dev-dependencies]
+tapestry-core = { path = "../tapestry-core" }
+
+[profile.release]
+lto = "thin"
+strip = true

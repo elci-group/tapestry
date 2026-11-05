@@ -1,0 +1,100 @@
+[[file]]
+path = "MVP_DIRECTIVE.md"
+required = true
+min_size_bytes = 6000
+require_regex = ["Luna swarm model", "Playbook usage policy", "A2 — product release"]
+
+[[file]]
+path = "README.md"
+required = true
+min_size_bytes = 700
+require_regex = ["Android TV", "local-review MVP source", "deliver.android.toml"]
+
+[[file]]
+path = "settings.gradle.kts"
+required = true
+
+[[file]]
+path = "build.gradle.kts"
+required = true
+require_regex = ["8.5.2"]
+
+[[file]]
+path = "gradle/wrapper/gradle-wrapper.properties"
+required = true
+require_regex = ["gradle-8.7-bin.zip", "distributionSha256Sum=544c35d6bd849ae8a5ed0bcea39ba677dc40f49df7d1835561582da2009b961d"]
+
+[[file]]
+path = "gradlew"
+required = true
+
+[[file]]
+path = "gradlew.bat"
+required = true
+
+[[file]]
+path = "app/src/main/AndroidManifest.xml"
+required = true
+require_regex = ["android.software.leanback", "LEANBACK_LAUNCHER", "android.hardware.touchscreen"]
+forbid_regex = ["android.permission.INTERNET"]
+
+[[file]]
+path = "app/build.gradle.kts"
+required = true
+require_regex = ["compileSdk = 34", "targetSdk = 34", "minSdk = 23"]
+
+[[file]]
+path = "app/src/main/res/drawable/tapestry_banner.xml"
+required = true
+
+[[file]]
+path = "app/src/main/res/values/styles.xml"
+required = true
+
+[[file]]
+path = "app/src/main/java/org/tapestry/androidtv/MainActivity.java"
+required = true
+forbid_regex = ["TODO", "FIXME", "unimplemented"]
+
+[[file]]
+path = "app/src/main/java/org/tapestry/androidtv/ReviewState.java"
+required = true
+forbid_regex = ["TODO", "FIXME", "unimplemented"]
+
+[[file]]
+path = "app/src/test/java/org/tapestry/androidtv/ReviewStateTest.java"
+required = true
+
+[[command]]
+name = "Host Java review-state compile"
+cmd = ["javac", "-d", "/tmp/tapestry-android-tv-host-test", "app/src/main/java/org/tapestry/androidtv/ReviewState.java", "app/src/test/java/org/tapestry/androidtv/ReviewStateTest.java"]
+expect_exit = 0
+timeout_secs = 60
+
+[[command]]
+name = "Host Java review-state assertions"
+cmd = ["java", "-cp", "/tmp/tapestry-android-tv-host-test", "org.tapestry.androidtv.ReviewStateTest"]
+expect_exit = 0
+timeout_secs = 30
+stdout_contains = ["ReviewStateTest: all assertions passed"]
+
+[[command]]
+name = "Android TV manifest contract"
+cmd = ["python3", "-c", "import xml.etree.ElementTree as E; r=E.parse('app/src/main/AndroidManifest.xml').getroot(); a='{http://schemas.android.com/apk/res/android}'; fs=r.findall('uses-feature'); assert any(x.get(a+'name')=='android.software.leanback' and x.get(a+'required')=='true' for x in fs); assert any(x.get(a+'name')=='android.hardware.touchscreen' and x.get(a+'required')=='false' for x in fs); assert not any(x.tag=='uses-permission' and x.get(a+'name')=='android.permission.INTERNET' for x in r); print('Manifest contract: all assertions passed')"]
+expect_exit = 0
+timeout_secs = 30
+stdout_contains = ["Manifest contract: all assertions passed"]
+
+[[command]]
+name = "Pinned Gradle wrapper"
+cmd = ["./gradlew", "--offline", "--version"]
+expect_exit = 0
+timeout_secs = 60
+stdout_contains = ["Gradle 8.7"]
+
+[[command]]
+name = "Gradle wrapper JAR integrity"
+cmd = ["python3", "-c", "import hashlib,pathlib; p=pathlib.Path('gradle/wrapper/gradle-wrapper.jar'); expected='cb0da6751c2b753a16ac168bb354870ebb1e162e9083f116729cec9c781156b8'; actual=hashlib.sha256(p.read_bytes()).hexdigest(); assert actual==expected, actual; print('Gradle wrapper JAR checksum: ok')"]
+expect_exit = 0
+timeout_secs = 30
+stdout_contains = ["Gradle wrapper JAR checksum: ok"]

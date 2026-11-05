@@ -103,6 +103,46 @@ fn stage_artifact(
     Ok(artifacts)
 }
 
+/// Stage bytes supplied by the user without transforming or regenerating them.
+fn stage_external_artifact(
+    dirs: &DataDirs,
+    session_id: &SessionId,
+    bytes: &[u8],
+) -> Result<Artifact, String> {
+    let mime = if bytes.starts_with(b"\x89PNG\r\n\x1a\n") {
+        "image/png"
+    } else if bytes.starts_with(b"\xff\xd8\xff") {
+        "image/jpeg"
+    } else if bytes.starts_with(b"GIF87a") || bytes.starts_with(b"GIF89a") {
+        "image/gif"
+    } else if bytes.len() >= 12 && &bytes[..4] == b"RIFF" && &bytes[8..12] == b"WEBP" {
+        "image/webp"
+    } else if bytes.starts_with(b"%PDF-") {
+        "application/pdf"
+    } else if std::str::from_utf8(bytes).is_ok() {
+        "text/plain"
+    } else {
+        "application/octet-stream"
+    };
+    let kind = if mime.starts_with("image/") {
+        ArtifactKind::Image
+    } else {
+        ArtifactKind::Document
+    };
+    let artifact = Artifact::builder(session_id.clone(), kind)
+        .mime(mime)
+        .content(bytes)
+        .build();
+    artifact.validate().map_err(|e| e.to_string())?;
+
+    std::fs::create_dir_all(dirs.artefacts()).map_err(|e| e.to_string())?;
+    let path = dirs.artefacts().join(format!("{}.bin", artifact.digest));
+    if !path.exists() {
+        std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
+    }
+    Ok(artifact)
+}
+
 fn record_session_event(session: &mut Session, kind: SessionEventKind) -> Result<(), String> {
     let event = SessionEvent {
         seq: session.last_seq + 1,
@@ -530,23 +570,23 @@ pub fn send_file(file: &Path, machine: bool) -> i32 {
     }
     let dirs = DataDirs::resolve();
     let session = Session::new(format!("send {}", file.display()));
-    match stage_artifact(&dirs, &session.id, file.to_string_lossy().as_ref(), 1, 1) {
-        Ok(artifacts) if !artifacts.is_empty() => {
+    match stage_external_artifact(&dirs, &session.id, &bytes) {
+        Ok(artifact) => {
             if machine {
                 println!(
                     "{}",
-                    serde_json::json!({"sent": artifacts[0].id.as_str(), "digest": artifacts[0].digest})
+                    serde_json::json!({"staged": artifact.id.as_str(), "digest": artifact.digest, "bytes": artifact.byte_length})
                 );
             } else {
                 println!(
                     "staged {} ({} bytes, digest {})",
-                    artifacts[0].id, artifacts[0].byte_length, artifacts[0].digest
+                    artifact.id, artifact.byte_length, artifact.digest
                 );
             }
             ExitCode::Ok.as_i32()
         }
-        _ => {
-            eprintln!("tapestry: staging failed");
+        Err(e) => {
+            eprintln!("tapestry: staging failed: {e}");
             ExitCode::Usage.as_i32()
         }
     }

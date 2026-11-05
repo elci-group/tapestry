@@ -1,8 +1,4 @@
-//! TAP/1 — the Tapestry Artefact Protocol schema (directive §9).
-//!
-//! Framed, multiplexed, resumable. This module defines the wire *schema*:
-//! frames, channels, chunks and negotiation messages. Byte-level framing
-//! and encryption belong to the transport swarm.
+//! TAP/1 — the Tapestry Artefact Protocol schema.
 
 pub mod chunk;
 pub mod frame;
@@ -12,8 +8,12 @@ pub mod negotiate;
 pub const PROTOCOL_NAME: &str = "TAP";
 pub const PROTOCOL_VERSION: u32 = 1;
 
+/// Compatibility label used by the WebOS client.
+#[allow(non_upper_case_globals)]
+pub const ProtocolVersion: &str = "TAP/1";
+
 /// Logical channels multiplexed over one session connection.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Channel {
     Control,
@@ -23,5 +23,3 @@ pub enum Channel {
     Review,
     Media,
 }
-
-use serde::{Deserialize, Serialize};

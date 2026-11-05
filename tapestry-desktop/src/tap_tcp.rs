@@ -33,6 +33,21 @@ pub fn encode_frame(frame: &Frame) -> io::Result<Vec<u8>> {
 pub fn read_frame<R: Read>(reader: &mut R) -> io::Result<Frame> {
     let mut len_bytes = [0u8; 8];
     reader.read_exact(&mut len_bytes)?;
+    read_frame_payload(reader, len_bytes)
+}
+
+fn read_frame_or_eof<R: Read>(reader: &mut R) -> io::Result<Option<Frame>> {
+    let mut len_bytes = [0u8; 8];
+    match reader.read(&mut len_bytes[..1])? {
+        0 => return Ok(None),
+        1 => {}
+        _ => unreachable!("read is limited to one byte"),
+    }
+    reader.read_exact(&mut len_bytes[1..])?;
+    read_frame_payload(reader, len_bytes).map(Some)
+}
+
+fn read_frame_payload<R: Read>(reader: &mut R, len_bytes: [u8; 8]) -> io::Result<Frame> {
     let len = u64::from_be_bytes(len_bytes) as usize;
     if len > MAX_FRAME_SIZE {
         return Err(io::Error::new(
@@ -42,7 +57,12 @@ pub fn read_frame<R: Read>(reader: &mut R) -> io::Result<Frame> {
     }
     let mut json = vec![0u8; len];
     reader.read_exact(&mut json)?;
-    Frame::from_json(&json).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+    let frame =
+        Frame::from_json(&json).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+    frame
+        .validate()
+        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+    Ok(frame)
 }
 
 /// Sender: write each frame, wait for a `+` ack before the next.
@@ -77,18 +97,9 @@ pub fn serve_one(listener: &TcpListener, payloads: &mut Vec<Vec<u8>>) -> io::Res
     let mut expected_seq = 1u64;
     let mut count = 0usize;
     loop {
-        let frame = match read_frame(&mut stream) {
-            Ok(f) => f,
-            Err(e)
-                if matches!(
-                    e.kind(),
-                    io::ErrorKind::UnexpectedEof
-                        | io::ErrorKind::WouldBlock
-                        | io::ErrorKind::TimedOut
-                ) =>
-            {
-                break;
-            }
+        let frame = match read_frame_or_eof(&mut stream) {
+            Ok(Some(f)) => f,
+            Ok(None) => break,
             Err(e) => {
                 let _ = stream.write_all(b"-");
                 return Err(e);

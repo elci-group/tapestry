@@ -1,0 +1,23 @@
+[[file]]
+path = "app/src/main/AndroidManifest.xml"
+required = true
+
+[[command]]
+name = "Build Android TV debug APK"
+cmd = ["./gradlew", "--offline", ":app:assembleDebug"]
+expect_exit = 0
+timeout_secs = 300
+stdout_contains = ["BUILD SUCCESSFUL"]
+
+[[command]]
+name = "Android lint"
+cmd = ["./gradlew", "--offline", ":app:lintDebug"]
+expect_exit = 0
+timeout_secs = 300
+stdout_contains = ["BUILD SUCCESSFUL"]
+
+[[command]]
+name = "Debug APK exists"
+cmd = ["test", "-f", "app/build/outputs/apk/debug/app-debug.apk"]
+expect_exit = 0
+timeout_secs = 30
