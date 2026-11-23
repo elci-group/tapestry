@@ -1,0 +1,350 @@
+@ontology tapestry_tv {
+  @cell root { id: "root"; fill: #f4f1ea; fill-to: #dbe7f0; fill-period-s: 18;
+
+    @cell thread_a { id: "ambient.thread_a"; position_p: (0.12, 0.3, 0); extent_p: (0.62, 0.014, 0); fill: #e2c9a0; drift-p: (0.08, 0.08, 0); drift-period-s: 37; }
+    @cell thread_b { id: "ambient.thread_b"; position_p: (0.22, 0.58, 0); extent_p: (0.58, 0.012, 0); fill: #bccfe0; drift-p: (0.1, 0.07, 0); drift-period-s: 53; }
+    @cell thread_c { id: "ambient.thread_c"; position_p: (0.16, 0.8, 0); extent_p: (0.5, 0.01, 0); fill: #e3c3b8; drift-p: (0.09, 0.06, 0); drift-period-s: 71; }
+    @cell thread_d { id: "ambient.thread_d"; position_p: (0.8, 0.16, 0); extent_p: (0.008, 0.62, 0); fill: #cdd8b8; drift-p: (0.1, 0.05, 0); drift-period-s: 47; }
+    @cell thread_e { id: "ambient.thread_e"; position_p: (0.3, 0.2, 0); extent_p: (0.006, 0.55, 0); fill: #d8c8e0; drift-p: (0.12, 0.04, 0); drift-period-s: 61; }
+
+    @cell stage { id: "stage"; position_p: (0, 0, 0); extent_p: (1, 1, 0); drift-p: (0.006, 0.009, 0); drift-period-s: 90;
+      @cell brand { id: "brand"; position_p: (0.05, 0.04, 0); extent_p: (0.3, 0.07, 0); text: "Tapestry"; text-size-p: 0.75; }
+      @cell detail { id: "detail"; position_p: (0.38, 0.04, 0); extent_p: (0.57, 0.07, 0); text-from: state.detail; text-size-p: 0.45; text-anchor: end; }
+      @cell outbox { id: "outbox"; position_p: (0.05, 0.91, 0); extent_p: (0.55, 0.06, 0); text-from: state.outbox; text-size-p: 0.5; }
+      @cell notice { id: "notice"; position_p: (0.62, 0.91, 0); extent_p: (0.33, 0.06, 0); text-from: state.notice; text-size-p: 0.5; text-anchor: end; }
+
+      @cell unpaired { id: "screen.unpaired"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.link is 0; appear-s: 0.6; appear-from-p: (0, 0.04, 0);
+        @cell unpaired_heading { id: "unpaired.heading"; position_p: (0, 0.05, 0); extent_p: (1, 0.15, 0); text: "Not paired"; text-size-p: 0.6; }
+        @cell unpaired_body { id: "unpaired.body"; position_p: (0, 0.25, 0); extent_p: (1, 0.3, 0); text: "Pair this TV with the Tapestry desktop on your network. Both screens will show the same six-digit code, and you confirm it on both."; wrap: 64; text-size-p: 0.17; }
+        @button pair { id: "pair"; position_p: (0, 0.82, 0); extent_p: (0.3, 0.14, 0); text: "Pair with desktop"; text-size-p: 0.35; fill: #d9e2ec; fill-to: #b9cfe3; fill-period-s: 3; stroke: #52606d; stroke-width-p: 0.02; }
+      }
+
+      @cell pairing { id: "screen.pairing"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.link is 1; appear-s: 0.6; appear-from-p: (0, 0.04, 0);
+        @cell pairing_heading { id: "pairing.heading"; position_p: (0, 0.05, 0); extent_p: (1, 0.15, 0); text: "Check the code"; text-size-p: 0.6; }
+        @cell pairing_code { id: "pairing.code"; position_p: (0.25, 0.24, 0); extent_p: (0.5, 0.28, 0); fill: #fffaf0; fill-to: #fde9b8; fill-period-s: 2; text-from: state.code; text-size-p: 0.7; text-anchor: middle; }
+        @cell pairing_body { id: "pairing.body"; position_p: (0, 0.56, 0); extent_p: (1, 0.2, 0); text: "Confirm only if the desktop shows exactly this code. If it differs, cancel: someone else may be on the network."; wrap: 70; text-size-p: 0.22; }
+        @button confirm_code { id: "pairing.confirm"; position_p: (0, 0.82, 0); extent_p: (0.3, 0.14, 0); text: "Codes match"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+        @button cancel_pairing { id: "pairing.cancel"; position_p: (0.34, 0.82, 0); extent_p: (0.25, 0.14, 0); text: "Cancel"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+      }
+
+      @cell waiting { id: "screen.waiting"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.link is 2; appear-s: 0.6; appear-from-p: (0, 0.04, 0);
+        @cell waiting_heading { id: "waiting.heading"; position_p: (0, 0.05, 0); extent_p: (1, 0.15, 0); text: "Waiting for the desktop"; text-size-p: 0.6; }
+        @cell waiting_code { id: "waiting.code"; position_p: (0.25, 0.24, 0); extent_p: (0.5, 0.28, 0); fill: #fffaf0; text-from: state.code; text-size-p: 0.7; text-anchor: middle; }
+        @cell waiting_body { id: "waiting.body"; position_p: (0, 0.56, 0); extent_p: (1, 0.2, 0); text: "On the desktop, run: tapestry tv confirm --code followed by this code."; wrap: 70; text-size-p: 0.22; }
+        @button cancel_waiting { id: "waiting.cancel"; position_p: (0, 0.82, 0); extent_p: (0.25, 0.14, 0); text: "Cancel"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+      }
+
+      @cell ready { id: "screen.ready"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.link is 3; appear-s: 0.6; appear-from-p: (0, 0.04, 0);
+        @cell ready_heading { id: "ready.heading"; position_p: (0, 0.05, 0); extent_p: (1, 0.15, 0); text: "Paired"; text-size-p: 0.6; }
+        @cell ready_body { id: "ready.body"; position_p: (0, 0.25, 0); extent_p: (1, 0.3, 0); text: "Waiting for the desktop to present an artefact. Images and videos appear here once they have been received in full and verified."; wrap: 64; text-size-p: 0.17; }
+        @button forget_ready { id: "ready.forget"; position_p: (0, 0.82, 0); extent_p: (0.3, 0.14, 0); text: "Forget desktop"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+      }
+
+      @cell receiving { id: "screen.receiving"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.link is 4; appear-s: 0.4;
+        @cell receiving_heading { id: "receiving.heading"; position_p: (0, 0.05, 0); extent_p: (1, 0.15, 0); text: "Receiving"; text-size-p: 0.6; }
+        @cell receiving_body { id: "receiving.body"; position_p: (0, 0.25, 0); extent_p: (1, 0.3, 0); text: "Checking media size, digest and dimensions before anything is shown."; wrap: 64; text-size-p: 0.17; }
+      }
+
+      @cell showing { id: "screen.showing"; position_p: (0, 0, 0); extent_p: (1, 1, 0); present-when: state.link is 5;
+        @cell present { id: "screen.present"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.mode is "PRESENT"; appear-s: 0.8; appear-from-p: (0, 0.03, 0);
+          @cell picture { id: "present.picture"; position_p: (0, 0, 0); extent_p: (1, 0.65, 0); fill: #202326; image-from: state.main; }
+          @cell picture_label { id: "present.label"; position_p: (0, 0.66, 0); extent_p: (1, 0.06, 0); text-from: state.label_main; text-size-p: 0.6; }
+          @cell rating { id: "present.rating"; position_p: (0, 0.75, 0); extent_p: (1, 0.10, 0); present-when: state.dialog is 0;
+            @cell rating_title { id: "present.rating_title"; position_p: (0, 0.12, 0); extent_p: (0.25, 0.76, 0); text: "Rate & next · 1–5"; text-size-p: 0.4; }
+            @button rate_1 { remote-digit: 1; id: "present.rate_1"; position_p: (0.270, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★"; text-size-p: 0.45; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button rate_2 { remote-digit: 2; id: "present.rate_2"; position_p: (0.415, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★"; text-size-p: 0.45; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button rate_3 { remote-digit: 3; id: "present.rate_3"; position_p: (0.560, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★★"; text-size-p: 0.45; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button rate_4 { remote-digit: 4; id: "present.rate_4"; position_p: (0.705, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★★★"; text-size-p: 0.32; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button rate_5 { remote-digit: 5; id: "present.rate_5"; position_p: (0.850, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★★★★"; text-size-p: 0.32; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+          }
+          @cell present_actions { id: "present.actions"; position_p: (0, 0.88, 0); extent_p: (1, 0.12, 0); present-when: state.dialog is 0; appear-s: 0.3;
+            @button approve { id: "present.approve"; position_p: (0, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Approve"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button reject { id: "present.reject"; position_p: (0.24, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Reject"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button defer_present { id: "present.defer"; position_p: (0.48, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Decide later"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell approve_dialog { id: "present.approve_dialog"; position_p: (0, 0.88, 0); extent_p: (1, 0.12, 0); present-when: state.dialog is 1; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell approve_prompt { id: "present.approve_prompt"; position_p: (0, 0.1, 0); extent_p: (0.5, 0.78, 0); text: "Approve? This is final."; text-size-p: 0.35; }
+            @button confirm_approve { id: "present.confirm_approve"; position_p: (0.52, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Yes, approve"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button cancel_approve { id: "present.cancel_approve"; position_p: (0.78, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell reject_dialog { id: "present.reject_dialog"; position_p: (0, 0.88, 0); extent_p: (1, 0.12, 0); present-when: state.dialog is 2; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell reject_prompt { id: "present.reject_prompt"; position_p: (0, 0.1, 0); extent_p: (0.5, 0.78, 0); text: "Reject? This is final."; text-size-p: 0.35; }
+            @button confirm_reject { id: "present.confirm_reject"; position_p: (0.52, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Yes, reject"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button cancel_reject { id: "present.cancel_reject"; position_p: (0.78, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+        }
+
+        @cell video_present { id: "screen.video"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.mode is "VIDEO"; appear-s: 0.8; appear-from-p: (0, 0.03, 0);
+          @cell video_picture { id: "video.picture"; position_p: (0, 0, 0); extent_p: (1, 0.58, 0); fill: #202326; image-from: state.main; }
+          @cell video_picture_label { id: "video.label"; position_p: (0, 0.59, 0); extent_p: (1, 0.06, 0); text-from: state.label_main; text-size-p: 0.6; }
+          @cell video_transport { id: "video.transport"; position_p: (0, 0.66, 0); extent_p: (1, 0.09, 0);
+            @button video_toggle { id: "video.toggle"; position_p: (0.000, 0.05, 0); extent_p: (0.19, 0.9, 0); text: "Play / pause"; text-size-p: 0.30; fill: #ccdceb; stroke: #9fb3c8; stroke-width-p: 0.018; }
+            @button video_back { id: "video.back"; position_p: (0.202, 0.05, 0); extent_p: (0.19, 0.9, 0); text: "−10 seconds"; text-size-p: 0.30; fill: #ccdceb; stroke: #9fb3c8; stroke-width-p: 0.018; }
+            @button video_forward { id: "video.forward"; position_p: (0.404, 0.05, 0); extent_p: (0.19, 0.9, 0); text: "+10 seconds"; text-size-p: 0.30; fill: #ccdceb; stroke: #9fb3c8; stroke-width-p: 0.018; }
+            @button video_replay { id: "video.replay"; position_p: (0.606, 0.05, 0); extent_p: (0.19, 0.9, 0); text: "Replay"; text-size-p: 0.30; fill: #ccdceb; stroke: #9fb3c8; stroke-width-p: 0.018; }
+            @button video_mute { id: "video.mute"; position_p: (0.808, 0.05, 0); extent_p: (0.19, 0.9, 0); text: "Mute / sound"; text-size-p: 0.30; fill: #ccdceb; stroke: #9fb3c8; stroke-width-p: 0.018; }
+          }
+          @cell video_rating { id: "video.rating"; position_p: (0, 0.76, 0); extent_p: (1, 0.10, 0); present-when: state.dialog is 0;
+            @cell video_rating_title { id: "video.rating_title"; position_p: (0, 0.12, 0); extent_p: (0.25, 0.76, 0); text: "Rate & next · 1–5"; text-size-p: 0.4; }
+            @button video_rate_1 { remote-digit: 1; id: "video.rate_1"; position_p: (0.270, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★"; text-size-p: 0.45; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button video_rate_2 { remote-digit: 2; id: "video.rate_2"; position_p: (0.415, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★"; text-size-p: 0.45; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button video_rate_3 { remote-digit: 3; id: "video.rate_3"; position_p: (0.560, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★★"; text-size-p: 0.45; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button video_rate_4 { remote-digit: 4; id: "video.rate_4"; position_p: (0.705, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★★★"; text-size-p: 0.32; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+            @button video_rate_5 { remote-digit: 5; id: "video.rate_5"; position_p: (0.850, 0.05, 0); extent_p: (0.13, 0.9, 0); text: "★★★★★"; text-size-p: 0.32; fill: #f7e7b2; fill-to: #ecd28a; fill-period-s: 6; stroke: #8a6027; stroke-width-p: 0.018; }
+          }
+          @cell video_present_actions { id: "video.actions"; position_p: (0, 0.88, 0); extent_p: (1, 0.12, 0); present-when: state.dialog is 0; appear-s: 0.3;
+            @button video_approve { id: "video.approve"; position_p: (0, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Approve"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button video_reject { id: "video.reject"; position_p: (0.24, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Reject"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button video_defer_present { id: "video.defer"; position_p: (0.48, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Decide later"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell video_approve_dialog { id: "video.approve_dialog"; position_p: (0, 0.88, 0); extent_p: (1, 0.12, 0); present-when: state.dialog is 1; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell video_approve_prompt { id: "video.approve_prompt"; position_p: (0, 0.1, 0); extent_p: (0.5, 0.78, 0); text: "Approve? This is final."; text-size-p: 0.35; }
+            @button video_confirm_approve { id: "video.confirm_approve"; position_p: (0.52, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Yes, approve"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button video_cancel_approve { id: "video.cancel_approve"; position_p: (0.78, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell video_reject_dialog { id: "video.reject_dialog"; position_p: (0, 0.88, 0); extent_p: (1, 0.12, 0); present-when: state.dialog is 2; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell video_reject_prompt { id: "video.reject_prompt"; position_p: (0, 0.1, 0); extent_p: (0.5, 0.78, 0); text: "Reject? This is final."; text-size-p: 0.35; }
+            @button video_confirm_reject { id: "video.confirm_reject"; position_p: (0.52, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Yes, reject"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button video_cancel_reject { id: "video.cancel_reject"; position_p: (0.78, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+        }
+
+        @cell compare { id: "screen.compare"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.mode is "COMPARE"; appear-s: 0.8; appear-from-p: (0, 0.03, 0);
+          @cell left_picture { id: "compare.left"; position_p: (0, 0, 0); extent_p: (0.49, 0.66, 0); fill: #202326; image-from: state.left; }
+          @cell right_picture { id: "compare.right"; position_p: (0.51, 0, 0); extent_p: (0.49, 0.66, 0); fill: #202326; image-from: state.right; }
+          @cell left_label { id: "compare.left_label"; position_p: (0, 0.67, 0); extent_p: (0.49, 0.08, 0); text-from: state.label_left; text-size-p: 0.6; }
+          @cell right_label { id: "compare.right_label"; position_p: (0.51, 0.67, 0); extent_p: (0.49, 0.08, 0); text-from: state.label_right; text-size-p: 0.6; }
+          @cell compare_actions { id: "compare.actions"; position_p: (0, 0.82, 0); extent_p: (1, 0.18, 0); present-when: state.dialog is 0; appear-s: 0.3;
+            @button select_left { id: "compare.select_left"; position_p: (0, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Choose left"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button select_right { id: "compare.select_right"; position_p: (0.26, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Choose right"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button defer_compare { id: "compare.defer"; position_p: (0.52, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Decide later"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell left_dialog { id: "compare.left_dialog"; position_p: (0, 0.82, 0); extent_p: (1, 0.18, 0); present-when: state.dialog is 3; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell left_prompt { id: "compare.left_prompt"; position_p: (0, 0.1, 0); extent_p: (0.5, 0.78, 0); text: "Choose left? This is final."; text-size-p: 0.35; }
+            @button confirm_left { id: "compare.confirm_left"; position_p: (0.52, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Yes, left"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button cancel_left { id: "compare.cancel_left"; position_p: (0.78, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell right_dialog { id: "compare.right_dialog"; position_p: (0, 0.82, 0); extent_p: (1, 0.18, 0); present-when: state.dialog is 4; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell right_prompt { id: "compare.right_prompt"; position_p: (0, 0.1, 0); extent_p: (0.5, 0.78, 0); text: "Choose right? This is final."; text-size-p: 0.35; }
+            @button confirm_right { id: "compare.confirm_right"; position_p: (0.52, 0.1, 0); extent_p: (0.22, 0.78, 0); text: "Yes, right"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button cancel_right { id: "compare.cancel_right"; position_p: (0.78, 0.1, 0); extent_p: (0.2, 0.78, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+        }
+
+        @cell web { id: "screen.web"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.mode is "WEB"; appear-s: 0.8; appear-from-p: (0, 0.03, 0);
+          @cell web_picture { id: "web.picture"; position_p: (0, 0, 0); extent_p: (0.6, 0.72, 0); fill: #202326; image-from: state.main; }
+          @cell web_title { id: "web.title"; position_p: (0, 0.73, 0); extent_p: (0.6, 0.06, 0); text-from: state.web_title; text-size-p: 0.6; }
+          @cell web_changes { id: "web.changes"; position_p: (0, 0.79, 0); extent_p: (0.6, 0.05, 0); text-from: state.web_changes; text-size-p: 0.6; }
+          @cell web_actions { id: "web.actions"; position_p: (0, 0.86, 0); extent_p: (0.6, 0.1, 0); present-when: state.dialog is 0; appear-s: 0.3;
+            @button web_approve { id: "web.approve"; position_p: (0, 0, 0); extent_p: (0.3, 1, 0); text: "Approve"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button web_reject { id: "web.reject"; position_p: (0.34, 0, 0); extent_p: (0.3, 1, 0); text: "Reject"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button web_defer { id: "web.defer"; position_p: (0.68, 0, 0); extent_p: (0.32, 1, 0); text: "Decide later"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell web_approve_dialog { id: "web.approve_dialog"; position_p: (0, 0.86, 0); extent_p: (0.6, 0.1, 0); present-when: state.dialog is 1; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell web_approve_prompt { id: "web.approve_prompt"; position_p: (0, 0, 0); extent_p: (0.36, 1, 0); text: "Approve this version?"; text-size-p: 0.35; }
+            @button web_confirm_approve { id: "web.confirm_approve"; position_p: (0.38, 0, 0); extent_p: (0.34, 1, 0); text: "Yes, approve"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button web_cancel_approve { id: "web.cancel_approve"; position_p: (0.76, 0, 0); extent_p: (0.24, 1, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell web_reject_dialog { id: "web.reject_dialog"; position_p: (0, 0.86, 0); extent_p: (0.6, 0.1, 0); present-when: state.dialog is 2; appear-s: 0.35; appear-from-p: (0.03, 0, 0);
+            @cell web_reject_prompt { id: "web.reject_prompt"; position_p: (0, 0, 0); extent_p: (0.36, 1, 0); text: "Reject this version?"; text-size-p: 0.35; }
+            @button web_confirm_reject { id: "web.confirm_reject"; position_p: (0.38, 0, 0); extent_p: (0.34, 1, 0); text: "Yes, reject"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button web_cancel_reject { id: "web.cancel_reject"; position_p: (0.76, 0, 0); extent_p: (0.24, 1, 0); text: "Back"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+          @cell web_panel { id: "web.panel"; position_p: (0.62, 0, 0); extent_p: (0.38, 0.96, 0);
+            @button web_tab_colour { id: "web.tab_colour"; position_p: (0, 0, 0); extent_p: (0.24, 0.09, 0); text: "Colours"; text-size-p: 0.32; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button web_tab_type { id: "web.tab_type"; position_p: (0.253, 0, 0); extent_p: (0.24, 0.09, 0); text: "Type"; text-size-p: 0.32; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button web_tab_size { id: "web.tab_size"; position_p: (0.506, 0, 0); extent_p: (0.24, 0.09, 0); text: "Sizes"; text-size-p: 0.32; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @button web_tab_other { id: "web.tab_other"; position_p: (0.76, 0, 0); extent_p: (0.24, 0.09, 0); text: "Other"; text-size-p: 0.32; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            @cell web_cat { id: "web.cat"; position_p: (0, 0.105, 0); extent_p: (1, 0.06, 0); text-from: state.web_cat; text-size-p: 0.55; }
+            @cell web_vars { id: "web.vars"; position_p: (0, 0, 0); extent_p: (1, 1, 0); present-when: state.web_pane is "VARS";
+              @button web_row_1 { id: "web.row_1"; position_p: (0, 0.18, 0); extent_p: (1, 0.1, 0); present-when: state.web_rows at-least 1; text-from: state.web_row_1; text-size-p: 0.3; fill: #eef2f6; stroke: #9fb3c8; stroke-width-p: 0.015; }
+              @button web_row_2 { id: "web.row_2"; position_p: (0, 0.29, 0); extent_p: (1, 0.1, 0); present-when: state.web_rows at-least 2; text-from: state.web_row_2; text-size-p: 0.3; fill: #eef2f6; stroke: #9fb3c8; stroke-width-p: 0.015; }
+              @button web_row_3 { id: "web.row_3"; position_p: (0, 0.40, 0); extent_p: (1, 0.1, 0); present-when: state.web_rows at-least 3; text-from: state.web_row_3; text-size-p: 0.3; fill: #eef2f6; stroke: #9fb3c8; stroke-width-p: 0.015; }
+              @button web_row_4 { id: "web.row_4"; position_p: (0, 0.51, 0); extent_p: (1, 0.1, 0); present-when: state.web_rows at-least 4; text-from: state.web_row_4; text-size-p: 0.3; fill: #eef2f6; stroke: #9fb3c8; stroke-width-p: 0.015; }
+              @button web_row_5 { id: "web.row_5"; position_p: (0, 0.62, 0); extent_p: (1, 0.1, 0); present-when: state.web_rows at-least 5; text-from: state.web_row_5; text-size-p: 0.3; fill: #eef2f6; stroke: #9fb3c8; stroke-width-p: 0.015; }
+              @button web_row_6 { id: "web.row_6"; position_p: (0, 0.73, 0); extent_p: (1, 0.1, 0); present-when: state.web_rows at-least 6; text-from: state.web_row_6; text-size-p: 0.3; fill: #eef2f6; stroke: #9fb3c8; stroke-width-p: 0.015; }
+              @button web_more { id: "web.more"; position_p: (0.5, 0.896, 0); extent_p: (0.5, 0.104, 0); present-when: state.web_more is true; text: "More variables"; text-size-p: 0.3; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            }
+            @cell web_options { id: "web.options"; position_p: (0, 0, 0); extent_p: (1, 1, 0); present-when: state.web_pane is "OPTIONS"; appear-s: 0.35; appear-from-p: (0.04, 0, 0);
+              @cell web_var { id: "web.var"; position_p: (0, 0.175, 0); extent_p: (1, 0.085, 0); fill: #fde9b8; text-from: state.web_var; text-size-p: 0.3; }
+              @button web_opt_1 { id: "web.opt_1"; position_p: (0, 0.270, 0); extent_p: (1, 0.085, 0); present-when: state.web_opts at-least 1; text-from: state.web_opt_1; text-size-p: 0.32; fill: #fff6e0; stroke: #b08a3e; stroke-width-p: 0.015; }
+              @button web_opt_2 { id: "web.opt_2"; position_p: (0, 0.365, 0); extent_p: (1, 0.085, 0); present-when: state.web_opts at-least 2; text-from: state.web_opt_2; text-size-p: 0.32; fill: #fff6e0; stroke: #b08a3e; stroke-width-p: 0.015; }
+              @button web_opt_3 { id: "web.opt_3"; position_p: (0, 0.460, 0); extent_p: (1, 0.085, 0); present-when: state.web_opts at-least 3; text-from: state.web_opt_3; text-size-p: 0.32; fill: #fff6e0; stroke: #b08a3e; stroke-width-p: 0.015; }
+              @button web_opt_4 { id: "web.opt_4"; position_p: (0, 0.555, 0); extent_p: (1, 0.085, 0); present-when: state.web_opts at-least 4; text-from: state.web_opt_4; text-size-p: 0.32; fill: #fff6e0; stroke: #b08a3e; stroke-width-p: 0.015; }
+              @button web_opt_5 { id: "web.opt_5"; position_p: (0, 0.650, 0); extent_p: (1, 0.085, 0); present-when: state.web_opts at-least 5; text-from: state.web_opt_5; text-size-p: 0.32; fill: #fff6e0; stroke: #b08a3e; stroke-width-p: 0.015; }
+              @button web_opt_6 { id: "web.opt_6"; position_p: (0, 0.745, 0); extent_p: (1, 0.085, 0); present-when: state.web_opts at-least 6; text-from: state.web_opt_6; text-size-p: 0.32; fill: #fff6e0; stroke: #b08a3e; stroke-width-p: 0.015; }
+              @button web_done { id: "web.done"; position_p: (0.5, 0.896, 0); extent_p: (0.5, 0.104, 0); text: "Done"; text-size-p: 0.3; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+            }
+            @button web_reset { id: "web.reset"; position_p: (0, 0.896, 0); extent_p: (0.48, 0.104, 0); text: "Undo changes"; text-size-p: 0.3; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+          }
+        }
+      }
+
+      @cell disconnected { id: "screen.disconnected"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.link is 6; appear-s: 0.6; appear-from-p: (0, 0.04, 0);
+        @cell disconnected_heading { id: "disconnected.heading"; position_p: (0, 0.05, 0); extent_p: (1, 0.15, 0); text: "Desktop unreachable"; text-size-p: 0.6; }
+        @cell disconnected_body { id: "disconnected.body"; position_p: (0, 0.25, 0); extent_p: (1, 0.3, 0); text: "Retrying automatically. Decisions waiting for the desktop are kept until it acknowledges them."; wrap: 64; text-size-p: 0.17; }
+        @button forget_disconnected { id: "disconnected.forget"; position_p: (0, 0.82, 0); extent_p: (0.3, 0.14, 0); text: "Forget desktop"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+      }
+
+      @cell failed { id: "screen.error"; position_p: (0.05, 0.14, 0); extent_p: (0.9, 0.74, 0); present-when: state.link is 7; appear-s: 0.6; appear-from-p: (0, 0.04, 0);
+        @cell error_heading { id: "error.heading"; position_p: (0, 0.05, 0); extent_p: (1, 0.15, 0); text: "Something went wrong"; text-size-p: 0.6; }
+        @cell error_body { id: "error.body"; position_p: (0, 0.25, 0); extent_p: (1, 0.3, 0); text-from: state.error; text-size-p: 0.17; }
+        @button retry { id: "error.retry"; position_p: (0, 0.82, 0); extent_p: (0.25, 0.14, 0); text: "Try again"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+        @button forget_error { id: "error.forget"; position_p: (0.29, 0.82, 0); extent_p: (0.3, 0.14, 0); text: "Forget desktop"; text-size-p: 0.35; fill: #d9e2ec; stroke: #52606d; stroke-width-p: 0.02; }
+      }
+    }
+  }
+
+  @state {
+    link: int = 0 host;
+    mode: text = "" host;
+    detail: text = "Starting" host;
+    code: text = "" host;
+    outbox: text = "" host;
+    error: text = "" host;
+    main: text = "" host;
+    left: text = "" host;
+    right: text = "" host;
+    label_main: text = "" host;
+    label_left: text = "" host;
+    label_right: text = "" host;
+    web_title: text = "" host;
+    web_cat: text = "" host;
+    web_rows: int = 0 host;
+    web_more: bool = false host;
+    web_pane: text = "" host;
+    web_var: text = "" host;
+    web_opts: int = 0 host;
+    web_changes: text = "" host;
+    web_row_1: text = "" host;
+    web_row_2: text = "" host;
+    web_row_3: text = "" host;
+    web_row_4: text = "" host;
+    web_row_5: text = "" host;
+    web_row_6: text = "" host;
+    web_opt_1: text = "" host;
+    web_opt_2: text = "" host;
+    web_opt_3: text = "" host;
+    web_opt_4: text = "" host;
+    web_opt_5: text = "" host;
+    web_opt_6: text = "" host;
+    dialog: int = 0 session;
+    notice: text = "" session;
+  }
+
+  @link desktop {
+    id: "link.desktop";
+    protocol: "goya.lanlink/0";
+    endpoint: "http://192.168.255.254:8770";
+    status: state.link;
+    mode: state.mode;
+    detail: state.detail;
+    code: state.code;
+    outbox: state.outbox;
+    error: state.error;
+    field web_title: state.web_title;
+    field web_cat: state.web_cat;
+    field web_rows: state.web_rows;
+    field web_more: state.web_more;
+    field web_pane: state.web_pane;
+    field web_var: state.web_var;
+    field web_opts: state.web_opts;
+    field web_changes: state.web_changes;
+    field web_row_1: state.web_row_1;
+    field web_row_2: state.web_row_2;
+    field web_row_3: state.web_row_3;
+    field web_row_4: state.web_row_4;
+    field web_row_5: state.web_row_5;
+    field web_row_6: state.web_row_6;
+    field web_opt_1: state.web_opt_1;
+    field web_opt_2: state.web_opt_2;
+    field web_opt_3: state.web_opt_3;
+    field web_opt_4: state.web_opt_4;
+    field web_opt_5: state.web_opt_5;
+    field web_opt_6: state.web_opt_6;
+    act web_cat;
+    act web_row;
+    act web_more;
+    act web_opt;
+    act web_done;
+    act web_reset;
+    slot main { image: state.main; label: state.label_main; }
+    slot left { image: state.left; label: state.label_left; }
+    slot right { image: state.right; label: state.label_right; }
+  }
+
+  @interaction pair_start { id: "action.pair.start"; trigger: button.pair.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop pair" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction pair_confirm { id: "action.pair.confirm"; trigger: button.confirm_code.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop confirm" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction pair_cancel { id: "action.pair.cancel"; trigger: button.cancel_pairing.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop cancel" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction wait_cancel { id: "action.wait.cancel"; trigger: button.cancel_waiting.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop cancel" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction ready_forget { id: "action.ready.forget"; trigger: button.forget_ready.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop forget" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction disconnected_forget { id: "action.disconnected.forget"; trigger: button.forget_disconnected.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop forget" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction error_retry { id: "action.error.retry"; trigger: button.retry.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop retry" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction error_forget { id: "action.error.forget"; trigger: button.forget_error.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop forget" result text; } state { write notice: text; } input { } set notice = effect.r; }
+
+  @interaction ask_approve { id: "action.ask.approve"; trigger: button.approve.activate; class: D1; state { write dialog: int; } input { } set dialog = 1; }
+  @interaction ask_reject { id: "action.ask.reject"; trigger: button.reject.activate; class: D1; state { write dialog: int; } input { } set dialog = 2; }
+  @interaction ask_left { id: "action.ask.left"; trigger: button.select_left.activate; class: D1; state { write dialog: int; } input { } set dialog = 3; }
+  @interaction ask_right { id: "action.ask.right"; trigger: button.select_right.activate; class: D1; state { write dialog: int; } input { } set dialog = 4; }
+  @interaction back_approve { id: "action.back.approve"; trigger: button.cancel_approve.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+  @interaction back_reject { id: "action.back.reject"; trigger: button.cancel_reject.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+  @interaction back_left { id: "action.back.left"; trigger: button.cancel_left.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+  @interaction back_right { id: "action.back.right"; trigger: button.cancel_right.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+
+  @interaction review_approve { id: "action.review.approve"; trigger: button.confirm_approve.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide APPROVE main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction review_reject { id: "action.review.reject"; trigger: button.confirm_reject.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide REJECT main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction review_left { id: "action.review.left"; trigger: button.confirm_left.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide SELECT left" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction review_right { id: "action.review.right"; trigger: button.confirm_right.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide SELECT right" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction defer_single { id: "action.review.defer_present"; trigger: button.defer_present.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide DEFER main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction defer_pair { id: "action.review.defer_compare"; trigger: button.defer_compare.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide DEFER" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+
+  @interaction video_ask_approve { id: "video.action.ask.approve"; trigger: button.video_approve.activate; class: D1; state { write dialog: int; } input { } set dialog = 1; }
+  @interaction video_ask_reject { id: "video.action.ask.reject"; trigger: button.video_reject.activate; class: D1; state { write dialog: int; } input { } set dialog = 2; }
+  @interaction video_back_approve { id: "video.action.back.approve"; trigger: button.video_cancel_approve.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+  @interaction video_back_reject { id: "video.action.back.reject"; trigger: button.video_cancel_reject.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+  @interaction video_review_approve { id: "video.action.review.approve"; trigger: button.video_confirm_approve.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide APPROVE main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction video_review_reject { id: "video.action.review.reject"; trigger: button.video_confirm_reject.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide REJECT main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction video_defer_single { id: "video.action.review.defer_present"; trigger: button.video_defer_present.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide DEFER main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction rate_1 { id: "action.rate_1"; trigger: button.rate_1.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_1 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction rate_2 { id: "action.rate_2"; trigger: button.rate_2.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_2 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction rate_3 { id: "action.rate_3"; trigger: button.rate_3.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_3 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction rate_4 { id: "action.rate_4"; trigger: button.rate_4.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_4 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction rate_5 { id: "action.rate_5"; trigger: button.rate_5.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_5 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction video_rate_1 { id: "action.video_rate_1"; trigger: button.video_rate_1.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_1 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction video_rate_2 { id: "action.video_rate_2"; trigger: button.video_rate_2.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_2 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction video_rate_3 { id: "action.video_rate_3"; trigger: button.video_rate_3.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_3 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction video_rate_4 { id: "action.video_rate_4"; trigger: button.video_rate_4.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_4 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction video_rate_5 { id: "action.video_rate_5"; trigger: button.video_rate_5.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide RATE_5 main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction playback_toggle { id: "action.playback.toggle"; trigger: button.video_toggle.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop playback toggle main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction playback_back { id: "action.playback.back"; trigger: button.video_back.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop playback back main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction playback_forward { id: "action.playback.forward"; trigger: button.video_forward.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop playback forward main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction playback_replay { id: "action.playback.replay"; trigger: button.video_replay.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop playback replay main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction playback_mute { id: "action.playback.mute"; trigger: button.video_mute.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop playback mute main" result text; } state { write notice: text; } input { } set notice = effect.r; }
+
+  @interaction web_cat_colour { id: "action.web_cat_colour"; trigger: button.web_tab_colour.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_cat colour" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_cat_type { id: "action.web_cat_type"; trigger: button.web_tab_type.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_cat type" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_cat_size { id: "action.web_cat_size"; trigger: button.web_tab_size.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_cat size" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_cat_other { id: "action.web_cat_other"; trigger: button.web_tab_other.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_cat other" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_row_1 { id: "action.web_pick_row_1"; trigger: button.web_row_1.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_row 1" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_opt_1 { id: "action.web_pick_opt_1"; trigger: button.web_opt_1.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_opt 1" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_row_2 { id: "action.web_pick_row_2"; trigger: button.web_row_2.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_row 2" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_opt_2 { id: "action.web_pick_opt_2"; trigger: button.web_opt_2.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_opt 2" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_row_3 { id: "action.web_pick_row_3"; trigger: button.web_row_3.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_row 3" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_opt_3 { id: "action.web_pick_opt_3"; trigger: button.web_opt_3.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_opt 3" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_row_4 { id: "action.web_pick_row_4"; trigger: button.web_row_4.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_row 4" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_opt_4 { id: "action.web_pick_opt_4"; trigger: button.web_opt_4.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_opt 4" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_row_5 { id: "action.web_pick_row_5"; trigger: button.web_row_5.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_row 5" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_opt_5 { id: "action.web_pick_opt_5"; trigger: button.web_opt_5.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_opt 5" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_row_6 { id: "action.web_pick_row_6"; trigger: button.web_row_6.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_row 6" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_pick_opt_6 { id: "action.web_pick_opt_6"; trigger: button.web_opt_6.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_opt 6" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_page_more { id: "action.web_page_more"; trigger: button.web_more.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_more" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_options_done { id: "action.web_options_done"; trigger: button.web_done.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_done" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_undo { id: "action.web_undo"; trigger: button.web_reset.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop act web_reset" result text; } state { write notice: text; } input { } set notice = effect.r; }
+  @interaction web_ask_approve { id: "action.web_ask_approve"; trigger: button.web_approve.activate; class: D1; state { write dialog: int; } input { } set dialog = 1; }
+  @interaction web_ask_reject { id: "action.web_ask_reject"; trigger: button.web_reject.activate; class: D1; state { write dialog: int; } input { } set dialog = 2; }
+  @interaction web_back_approve { id: "action.web_back_approve"; trigger: button.web_cancel_approve.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+  @interaction web_back_reject { id: "action.web_back_reject"; trigger: button.web_cancel_reject.activate; class: D1; state { write dialog: int; } input { } set dialog = 0; }
+  @interaction web_review_approve { id: "action.web_review_approve"; trigger: button.web_confirm_approve.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide APPROVE main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction web_review_reject { id: "action.web_review_reject"; trigger: button.web_confirm_reject.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide REJECT main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+  @interaction web_review_defer { id: "action.web_review_defer"; trigger: button.web_defer.activate; class: D2; effects { network; } requests { r: effect network capability "network" request "desktop decide DEFER main" result text; } state { write dialog: int; write notice: text; } input { } set dialog = 0; set notice = effect.r; }
+}
