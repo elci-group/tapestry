@@ -1,0 +1,200 @@
+--- a/crates/arachnid/src/emit.rs
++++ b/crates/arachnid/src/emit.rs
+@@ -183,6 +183,7 @@
+                 "<img class=\"i\" alt=\"\" hidden data-image-from=\"{}\">",
+                 html_escape(key)
+             ));
++            text.push_str(&format!("<video class=\"i\" controls playsinline preload=\"metadata\" hidden data-image-from=\"{}\" aria-label=\"Video review playback\"></video>", html_escape(key)));
+         }
+         body.push_str(&format!("<div {attrs} style=\"{style}\">{text}</div>\n"));
+         while open.last() == Some(&(i + 1)) {
+@@ -611,13 +612,18 @@
+     }},
+     setImage: function (key, blob, handle) {{
+       if (!HOST[key] || TYPES[key] !== "text") throw new Error(key + " is not a host text key");
+-      if (!(blob instanceof Blob) || (blob.type !== "image/png" && blob.type !== "image/jpeg")) throw new Error("only PNG or JPEG blobs are shown");
++      if (!(blob instanceof Blob) || (blob.type !== "image/png" && blob.type !== "image/jpeg" && blob.type !== "video/mp4")) throw new Error("only PNG, JPEG or MP4 blobs are shown");
+       if (typeof handle !== "string" || handle === "") throw new Error("an image needs a non-empty handle");
+       if (imageUrls[key]) URL.revokeObjectURL(imageUrls[key]);
+       imageUrls[key] = URL.createObjectURL(blob);
+-      var imgs = document.querySelectorAll("img[data-image-from]");
++      var imgs = document.querySelectorAll("img[data-image-from],video[data-image-from]");
+       for (var i = 0; i < imgs.length; i++) {{
+-        if (imgs[i].getAttribute("data-image-from") === key) {{ imgs[i].src = imageUrls[key]; imgs[i].hidden = false; }}
++        if (imgs[i].getAttribute("data-image-from") === key) {{
++          var video = imgs[i].tagName.toLowerCase() === "video";
++          imgs[i].hidden = video !== (blob.type === "video/mp4");
++          if (!imgs[i].hidden) imgs[i].src = imageUrls[key];
++          else {{ if (video) imgs[i].pause(); imgs[i].removeAttribute("src"); if (video) imgs[i].load(); }}
++        }}
+       }}
+       this.set(key, handle);
+     }},
+@@ -625,9 +631,9 @@
+       if (!HOST[key]) throw new Error(key + " is not host state");
+       if (imageUrls[key]) URL.revokeObjectURL(imageUrls[key]);
+       delete imageUrls[key];
+-      var imgs = document.querySelectorAll("img[data-image-from]");
++      var imgs = document.querySelectorAll("img[data-image-from],video[data-image-from]");
+       for (var i = 0; i < imgs.length; i++) {{
+-        if (imgs[i].getAttribute("data-image-from") === key) {{ imgs[i].removeAttribute("src"); imgs[i].hidden = true; }}
++        if (imgs[i].getAttribute("data-image-from") === key) {{ if (imgs[i].pause) imgs[i].pause(); imgs[i].removeAttribute("src"); if (imgs[i].load) imgs[i].load(); imgs[i].hidden = true; }}
+       }}
+       this.set(key, "");
+     }},
+--- a/crates/arachnid/src/lanlink.rs
++++ b/crates/arachnid/src/lanlink.rs
+@@ -51,7 +51,7 @@
+ pub const MIN_CHROMIUM: u16 = 87;
+ pub const FILE: &str = "lanlink.js";
+ 
+-const DECISIONS: &[&str] = &["APPROVE", "REJECT", "SELECT", "DEFER"];
++const DECISIONS: &[&str] = &["APPROVE", "REJECT", "SELECT", "DEFER", "RATE_1", "RATE_2", "RATE_3", "RATE_4", "RATE_5"];
+ 
+ fn endpoint_ok(e: &str) -> bool {
+     let Some(rest) = e.strip_prefix("http://") else { return false };
+@@ -103,6 +103,7 @@
+             let ok = match words.as_slice() {
+                 [_, "pair" | "confirm" | "cancel" | "forget" | "retry"] => true,
+                 [_, "decide", d] => DECISIONS.contains(d) && *d == "DEFER",
++                [_, "playback", "toggle" | "replay" | "back" | "forward" | "mute", s] => slot_ok(s),
+                 [_, "decide", d, s] => DECISIONS.contains(d) && slot_ok(s),
+                 _ => false,
+             };
+@@ -164,7 +165,7 @@
+   var CONFIG = __CONFIG__;
+   var PROTOCOL = "__PROTOCOL__";
+   var MSG = "/lanlink/v0/msg";
+-  var MAX_BYTES = 16 * 1024 * 1024, MAX_PIXELS = 16000000, WINDOW = 64;
++  var MAX_VIDEO_BYTES = 64 * 1024 * 1024, MAX_BYTES = 16 * 1024 * 1024, MAX_PIXELS = 16000000, WINDOW = 64;
+   var ST = { UNPAIRED: 0, PAIRING: 1, WAITING: 2, READY: 3, RECEIVING: 4, SHOWING: 5, UNREACHABLE: 6, ERROR: 7 };
+   var S = window.crypto && window.crypto.subtle, A = window.Arachnid;
+   var enc = new TextEncoder(), dec = new TextDecoder();
+@@ -193,7 +194,9 @@
+   if (!A) return;
+ 
+   function role(r, v) { if (CONFIG.roles[r]) A.set(CONFIG.roles[r], v); }
+-  function status(v) { role("status", v); }
++  function pauseVideos() { var v = document.querySelectorAll("video"); for (var i = 0; i < v.length; i++) v[i].pause(); }
++  function status(v) { if (v !== ST.SHOWING) pauseVideos(); role("status", v); }
++  document.addEventListener("visibilitychange", function () { if (document.hidden) pauseVideos(); });
+   function current() { return CONFIG.roles.status ? A.get(CONFIG.roles.status) : null; }
+   function fail(m) { role("error", m); status(ST.ERROR); }
+   function LinkLost(m) { this.message = m; }
+@@ -304,24 +307,47 @@
+   }
+ 
+   function sigOk(b, mime) {
++    if (mime === "video/mp4") return b.length >= 12 && b[4] === 102 && b[5] === 116 && b[6] === 121 && b[7] === 112;
+     if (mime === "image/png") return b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
+     return mime === "image/jpeg" && b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff;
+   }
+   function valid(p) {
++    if (p.mode !== "PRESENT" && p.mode !== "COMPARE") return false;
++    if (!p.slots || p.slots.map(function (s) { return s.slot; }).join(",") !== (p.mode === "PRESENT" ? "main" : "left,right")) return false;
+     if (typeof p.id !== "string" || typeof p.mode !== "string" || !p.slots || !p.slots.length) return false;
+     for (var i = 0; i < p.slots.length; i++) {
+       var a = p.slots[i];
+       if (!CONFIG.slots.hasOwnProperty(a.slot)) return false;
+-      if ((a.mime !== "image/png" && a.mime !== "image/jpeg") || !(a.byte_length > 0 && a.byte_length <= MAX_BYTES)) return false;
++      var video = a.mime === "video/mp4";
++      if (video && p.mode !== "PRESENT") return false;
++      if ((a.mime !== "image/png" && a.mime !== "image/jpeg" && !video) || !(a.byte_length > 0 && a.byte_length <= (video ? MAX_VIDEO_BYTES : MAX_BYTES))) return false;
+       if (!(a.width > 0 && a.height > 0 && a.width * a.height <= MAX_PIXELS) || !/^[0-9a-f]{64}$/.test(a.sha256)) return false;
+     }
+     return true;
+   }
+   function decoded(blob) {
+     return new Promise(function (ok, no) {
+-      var url = URL.createObjectURL(blob), img = new Image();
+-      img.onload = function () { URL.revokeObjectURL(url); ok([img.naturalWidth, img.naturalHeight]); };
+-      img.onerror = function () { URL.revokeObjectURL(url); no(new Error("an image does not decode")); };
++      var url = URL.createObjectURL(blob), video = blob.type === "video/mp4";
++      var img = video ? document.createElement("video") : new Image();
++      var timer = setTimeout(function () { done(new Error("media decode timed out")); }, 15000);
++      function done(error) {
++        clearTimeout(timer);
++        var size = video ? [img.videoWidth, img.videoHeight] : [img.naturalWidth, img.naturalHeight];
++        img.onload = img.onloadedmetadata = img.onerror = null;
++        if (video) { img.pause(); img.removeAttribute("src"); img.load(); }
++        URL.revokeObjectURL(url);
++        if (error) no(error); else ok(size);
++      }
++      if (video) {
++        if (!img.canPlayType("video/mp4")) { done(new Error("MP4 playback is unavailable on this TV")); return; }
++        img.preload = "metadata";
++        img.onloadedmetadata = function () { done(); };
++        img.onerror = function () { done(new Error("This TV cannot decode the MP4 video")); };
++        img.src = url;
++        return;
++      }
++      img.onload = function () { done(); };
++      img.onerror = function () { done(new Error("an image does not decode")); };
+       img.src = url;
+     });
+   }
+@@ -350,7 +376,7 @@
+       A.setImage(s.image, blobs[i], p.slots[i].id);
+       if (s.label) A.set(s.label, p.slots[i].label + " · " + p.slots[i].width + "×" + p.slots[i].height);
+     }
+-    role("mode", p.mode);
++    role("mode", p.mode === "PRESENT" && p.slots[0].mime === "video/mp4" ? "VIDEO" : p.mode);
+     shown = p; lastShown = p.id;
+     role("detail", peer + " · showing");
+     status(ST.SHOWING);
+@@ -396,23 +422,45 @@
+       var item = outbox[0];
+       var m = await send({ type: "decide", client_review_id: item.client_review_id, presentation_id: item.presentation_id, decision: item.decision, slot: item.slot });
+       if (outbox[0] !== item) continue;
++      if (m.type !== "review_ack" || m.client_review_id !== item.client_review_id) throw new Error(peer + " refused the decision: " + (m.reason || m.type));
+       outbox.shift();
+       showOutbox();
+-      if (m.type !== "review_ack" || m.client_review_id !== item.client_review_id) throw new Error(peer + " refused the decision: " + (m.reason || m.type));
+       if (shown && shown.id === item.presentation_id) { shown = null; clearSlots(); role("mode", ""); status(ST.READY); }
+     }
+   }
+   async function decide(decision, slot) {
+     if (!shown || !link) throw new Error("nothing is shown");
+     if (slot && !shown.slots.some(function (s) { return s.slot === slot; })) throw new Error("slot " + slot + " is not shown");
++    if (outbox.some(function (r) { return r.presentation_id === shown.id; })) return "Decision already waiting for " + peer;
+     outbox.push({ client_review_id: clientId(), presentation_id: shown.id, decision: decision, slot: slot || null });
+     showOutbox();
+-    var word = { APPROVE: "Approved", REJECT: "Rejected", SELECT: "Chosen", DEFER: "Deferred" }[decision];
++    var word = /^RATE_[1-5]$/.test(decision) ? "Rated " + decision.slice(-1) + "/5" : { APPROVE: "Approved", REJECT: "Rejected", SELECT: "Chosen", DEFER: "Deferred" }[decision];
+     try { await flush(generation); return word + " · acknowledged by " + peer; }
+     catch (e) {
+       if (e instanceof LinkLost) { forget(); fail("Pairing ended: " + e.message + "."); return word + " · not delivered"; }
+       return word + " · waiting for " + peer;
+     }
++  }
++
++  async function playback(action, slot) {
++    if (!shown || current() !== ST.SHOWING) return "No video is showing";
++    var binding = CONFIG.slots[slot];
++    if (!binding) return "Unknown video slot";
++    var all = document.querySelectorAll("video[data-image-from]"), v = null;
++    for (var i = 0; i < all.length; i++) {
++      if (all[i].getAttribute("data-image-from") === binding.image && !all[i].hidden && all[i].offsetParent !== null) v = all[i];
++    }
++    if (!v) return "No video in this slot";
++    if (action === "toggle") {
++      if (v.paused || v.ended) { if (v.ended) v.currentTime = 0; try { await v.play(); } catch (e) { return "Playback could not start; try Play again"; } }
++      else v.pause();
++      return v.paused ? "Paused" : "Playing";
++    }
++    if (action === "mute") { v.muted = !v.muted; return v.muted ? "Muted" : "Sound on"; }
++    if (!(v.readyState >= 1) || !isFinite(v.duration)) return "Video is loading";
++    v.currentTime = action === "replay" ? 0 : Math.max(0, Math.min(v.duration, v.currentTime + (action === "back" ? -10 : 10)));
++    if (action === "replay") { try { await v.play(); } catch (e) { return "Ready at start; press Play"; } }
++    return action === "replay" ? "Replaying" : Math.floor(v.currentTime) + " seconds";
+   }
+ 
+   A.provide("network", async function (request) {
+@@ -424,6 +472,7 @@
+       if (w[1] === "cancel") { forget(); return "Pairing cancelled"; }
+       if (w[1] === "forget") { forget(); return peer + " forgotten"; }
+       if (w[1] === "retry") { if (link) { status(shown ? ST.SHOWING : ST.READY); poll(generation); return "Retrying"; } forget(); return "Pair again"; }
++      if (w[1] === "playback") return await playback(w[2], w[3]);
+       if (w[1] === "decide") return await decide(w[2], w[3]);
+       throw new Error("unknown request " + request);
+     } catch (e) {
