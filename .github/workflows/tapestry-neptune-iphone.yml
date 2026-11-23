@@ -24,8 +24,8 @@ jobs:
         shell: bash
         run: |
           cd tapestry-webos/ios-neptune/Web
-          base64 --decode arachnid-splash.png.b64 > arachnid-splash.png
-          base64 --decode icon.png.b64 > icon.png
+          base64 -D -i arachnid-splash.png.b64 -o arachnid-splash.png
+          base64 -D -i icon.png.b64 -o icon.png
           rm arachnid-splash.png.b64 icon.png.b64
 
       - name: Build unsigned iPhone app
