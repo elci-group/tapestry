@@ -1,0 +1,22 @@
+html,body{margin:0;padding:0;width:1920px;height:1080px;overflow:hidden;background:#000}
+#ontology{position:relative;width:1920px;height:1080px;overflow:hidden;background:#fff;font-family:sans-serif;color:#000}
+.n{position:absolute;box-sizing:border-box;overflow:hidden;white-space:pre;margin:0;padding:0}
+.b{cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center}
+.b[hidden]{display:none}
+.b.f{box-shadow:0 0 0 4px #000,0 0 0 8px #fff;z-index:1}
+.i{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain}
+.n.z{z-index:0}
+.g{position:absolute;left:0;top:0;width:100%;height:100%;z-index:-1;opacity:0;pointer-events:none;will-change:opacity;animation:breathe 1s ease-in-out infinite alternate}
+@keyframes breathe{from{opacity:0}to{opacity:1}}
+.m{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none;will-change:transform;animation:orbit 1s linear infinite}
+.m .n,.w .n{pointer-events:auto}
+.w{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+.w.a{animation:appear 1s ease-out both}
+@keyframes appear{from{opacity:0;transform:translate(var(--dx),var(--dy))}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes orbit{0%,100%{transform:translate(var(--ax),0)}12.5%{transform:translate(calc(var(--ax)*.7071),calc(var(--ay)*.7071))}25%{transform:translate(0,var(--ay))}37.5%{transform:translate(calc(var(--ax)*-.7071),calc(var(--ay)*.7071))}50%{transform:translate(calc(var(--ax)*-1),0)}62.5%{transform:translate(calc(var(--ax)*-.7071),calc(var(--ay)*-.7071))}75%{transform:translate(0,calc(var(--ay)*-1))}87.5%{transform:translate(calc(var(--ax)*.7071),calc(var(--ay)*-.7071))}}
+@media (prefers-reduced-motion:reduce){.g,.m.dec{animation:none}.w.a{animation-name:fadein}}
+#arachnid-splash{position:absolute;left:0;top:0;width:1920px;height:1080px;z-index:2147483647;background:radial-gradient(ellipse at center,#ece0c7 0%,#dfd0b2 70%);will-change:opacity;animation:arachnid-splash-out 400ms ease-in 1200ms forwards}
+#arachnid-splash img{position:absolute;object-fit:contain;-webkit-mask-image:radial-gradient(circle closest-side,#000 92%,transparent 100%)}
+@keyframes arachnid-splash-out{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){#arachnid-splash{animation-duration:1ms;animation-delay:1200ms}}
