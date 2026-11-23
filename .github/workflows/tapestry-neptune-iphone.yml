@@ -1,0 +1,47 @@
+name: Tapestry iPhone (Neptune)
+
+on:
+  push:
+    branches:
+      - codex/tapestry-neptune-iphone
+    paths:
+      - "tapestry-webos/ios-neptune/**"
+      - ".github/workflows/tapestry-neptune-iphone.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Check out Tapestry
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Restore web assets
+        shell: bash
+        run: |
+          cd tapestry-webos/ios-neptune/Web
+          base64 --decode arachnid-splash.png.b64 > arachnid-splash.png
+          base64 --decode icon.png.b64 > icon.png
+          rm arachnid-splash.png.b64 icon.png.b64
+
+      - name: Build unsigned iPhone app
+        run: sh tapestry-webos/ios-neptune/build-device.sh
+
+      - name: Package app bundle
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            tapestry-webos/ios-neptune/.build/NeptuneScene.app \
+            "$RUNNER_TEMP/Tapestry-iPhone-unsigned.app.zip"
+          shasum -a 256 "$RUNNER_TEMP/Tapestry-iPhone-unsigned.app.zip"
+
+      - name: Upload app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tapestry-iPhone-unsigned
+          path: ${{ runner.temp }}/Tapestry-iPhone-unsigned.app.zip
+          if-no-files-found: error
+          retention-days: 1
